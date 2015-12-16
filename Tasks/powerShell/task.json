@@ -13,7 +13,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 5
+        "Patch": 6
     },
     "demands": [
         "DotNetFramework"
@@ -49,6 +49,24 @@
             "defaultValue":"", 
             "required":false,
             "helpMarkDown": "Current working directory when script is run.  Defaults to the folder where the script is located.",
+            "groupName":"advanced"
+        },
+        {
+            "name": "noProfile",
+            "type": "boolean",
+            "label": "No profile",
+            "defaultValue": "true",
+            "required": false,
+            "helpMarkDown": "Controls whether to load profile scripts.",
+            "groupName":"advanced"
+        },
+        {
+            "name": "failOnStandardError",
+            "type": "boolean",
+            "label": "Fail on Standard Error",
+            "defaultValue": "true",
+            "required": false,
+            "helpMarkDown": "Indicates whether to fail the task if any output is written to the error stream of the process. Write-Error propagates to the error stream of the process. Additionally, error stream data from an external command propagates to the error stream of the PowerShell process.",
             "groupName":"advanced"
         }
     ],

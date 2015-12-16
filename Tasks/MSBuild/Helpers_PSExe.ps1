@@ -1,11 +1,11 @@
 function Format-MSBuildArguments {
-    [cmdletbinding()]
+    [CmdletBinding()]
     param(
         [string]$MSBuildArguments,
         [string]$Platform,
-        [string]$Configuration
-    )
+        [string]$Configuration)
 
+    Trace-VstsEnteringInvocation $MyInvocation
     if ($Platform) {
         Write-Verbose "Adding platform: $platform"
         $MSBuildArguments = "$MSBuildArguments /p:platform=`"$Platform`""
@@ -16,41 +16,33 @@ function Format-MSBuildArguments {
         $MSBuildArguments = "$MSBuildArguments /p:configuration=`"$Configuration`""
     }
 
-    Write-Verbose "MSBuildArguments = $MSBuildArguments"
     $MSBuildArguments
+    Trace-VstsLeavingInvocation $MyInvocation
 }
 
 function Get-SolutionFiles {
-    [cmdletbinding()]
+    [CmdletBinding()]
     param(
-        [string]$Solution
-    )
+        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $true)]
+        [string]$Solution)
 
-    if (!$Solution) {
-        throw (Get-LocalizedString -Key "Solution parameter not set on script")
-    }
-
-    # check for solution pattern
+    Trace-VstsEnteringInvocation $MyInvocation
     if ($Solution.Contains("*") -or $Solution.Contains("?")) {
-        Write-Verbose "Pattern found in solution parameter. Calling Find-Files."
-        Write-Verbose "Find-Files -SearchPattern $Solution"
-        $solutionFiles = Find-Files -SearchPattern $Solution
-        $OFS = " "
-        Write-Verbose "solutionFiles = $solutionFiles"
+        $solutionFiles = Find-VstsFiles -LegacyPattern $Solution
+        if (!$solutionFiles.Count) {
+            throw (Get-VstsLocString -Key "SolutionNotFoundUsingSearchPattern0" -ArgumentList $Solution)
+        }
     } else {
-        Write-Verbose "No Pattern found in solution parameter."
         $solutionFiles = ,$Solution
     }
 
-    if (!$solutionFiles) {
-        throw (Get-LocalizedString -Key "No solution was found using search pattern '{0}'." -ArgumentList $Solution)
-    }
-
     $solutionFiles
+    Trace-VstsLeavingInvocation $MyInvocation
 }
 
 function Invoke-BuildTools {
-    [cmdletbinding()]
+    [CmdletBinding()]
     param(
         [switch]$NuGetRestore,
         [string[]]$SolutionFiles,
@@ -60,32 +52,34 @@ function Invoke-BuildTools {
         [switch]$NoTimelineLogger
     )
 
-    $nugetPath = Get-ToolPath -Name 'NuGet.exe'
+    Trace-VstsEnteringInvocation $MyInvocation
+    $nugetPath = Get-VstsAgentToolPath -Name 'NuGet.exe'
     if (-not $nugetPath -and $NuGetRestore) {
-        Write-Warning (Get-LocalizedString -Key "Unable to locate {0}. Package restore will not be performed for the solutions" -ArgumentList 'nuget.exe')
+        Write-Warning (Get-VstsLocString -Key "UnableToLocateNugetExeRestoreNotPerformed" -ArgumentList 'nuget.exe')
     }
 
     foreach ($file in $SolutionFiles) {
         if ($nugetPath -and $NuGetRestore) {
             if ($env:NUGET_EXTENSIONS_PATH) {
-                Write-Host (Get-LocalizedString -Key "Detected NuGet extensions loader path. Environment variable NUGET_EXTENSIONS_PATH is set to: {0}" -ArgumentList $env:NUGET_EXTENSIONS_PATH)
+                Write-Host (Get-VstsLocString -Key "DetectedNuGetExtensionsLoaderPath0" -ArgumentList $env:NUGET_EXTENSIONS_PATH)
             }
 
-            $slnFolder = [System.IO.Path]::GetDirectoryName($file)
-            Write-Verbose "Running nuget package restore for: $slnFolder"
-            Invoke-Tool -Path $nugetPath -Arguments "restore `"$file`" -NonInteractive" -WorkingFolder $slnFolder
+            $slnDirectory = [System.IO.Path]::GetDirectoryName($file)
+            Invoke-VstsTool -FileName $nugetPath -Arguments "restore `"$file`" -NonInteractive" -WorkingDirectory $slnDirectory
         }
 
         if ($Clean) {
-            Invoke-MSBuild $file -Targets Clean -LogFile "$file-clean.log" -ToolLocation $MSBuildLocation -CommandLineArgs $MSBuildArguments -NoTimelineLogger:$NoTimelineLogger
+            Invoke-VstsMSBuild -ProjectFile $file -Targets Clean -LogFile "$file-clean.log" -MSBuildPath $MSBuildLocation -AdditionalArguments $MSBuildArguments -NoTimelineLogger:$NoTimelineLogger
         }
 
-        Invoke-MSBuild $file -LogFile "$file.log" -ToolLocation $MSBuildLocation -CommandLineArgs $MSBuildArguments -NoTimelineLogger:$NoTimelineLogger
+        Invoke-VstsMSBuild -ProjectFile $file -LogFile "$file.log" -MSBuildPath $MSBuildLocation -AdditionalArguments $MSBuildArguments -NoTimelineLogger:$NoTimelineLogger
     }
+
+    Trace-VstsLeavingInvocation $MyInvocation
 }
 
 function Select-MSBuildLocation {
-    [cmdletbinding()]
+    [CmdletBinding()]
     param(
         [string]$Method,
         [string]$Location,
@@ -93,6 +87,8 @@ function Select-MSBuildLocation {
         [switch]$RequireVersion,
         [string]$Architecture
     )
+
+    Trace-VstsEnteringInvocation $MyInvocation
 
     # Default the msbuildLocationMethod if not specified. The input msbuildLocationMethod
     # was added to the definition after the input msbuildLocation.
@@ -118,28 +114,26 @@ function Select-MSBuildLocation {
 
         # Look for a specific version of MSBuild.
         if ($Version -and "$Version".ToUpperInvariant() -ne 'LATEST') {
-            Write-Verbose "Searching for MSBuild version: $Version"
-            $Location = Get-MSBuildLocation -Version $Version -Architecture $Architecture
+            $Location = Get-VstsMSBuildPath -Version $Version -Architecture $Architecture
 
             # Warn if not found and the preferred version is not required.
             if (!$Location -and !$RequireVersion) {
-                Write-Warning (Get-LocalizedString -Key 'Unable to find MSBuild: Version = {0}, Architecture = {1}. Looking for the latest version.' -ArgumentList $Version, $Architecture)
+                Write-Warning (Get-VstsLocString -Key 'UnableToFindMSBuildVersion0Architecture1LookingForLatestVersion.' -ArgumentList $Version, $Architecture)
             }
         }
 
         # Look for the latest version of MSBuild.
         if (!$Location -and ("$Version".ToUpperInvariant() -eq 'LATEST' -or !$RequireVersion)) {
             Write-Verbose 'Searching for latest MSBuild version.'
-            $Location = Get-MSBuildLocation -Version '' -Architecture $Architecture
+            $Location = Get-VstsMSBuildPath -Version '' -Architecture $Architecture
         }
 
         # Throw if not found.
         if (!$Location) {
-            throw (Get-LocalizedString -Key 'MSBuild not found: Version = {0}, Architecture = {1}. Try a different version/architecture combination, specify a location, or install the appropriate MSBuild version/architecture.' -ArgumentList $Version, $Architecture)
+            throw (Get-VstsLocString -Key 'MSBuildNotFoundVersion0Architecture1TryDifferent' -ArgumentList $Version, $Architecture)
         }
-
-        Write-Verbose "MSBuild location = $Location"
     }
 
     $Location
+    Trace-VstsLeavingInvocation $MyInvocation
 }

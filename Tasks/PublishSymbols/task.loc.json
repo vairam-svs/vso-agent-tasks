@@ -15,7 +15,7 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 13
+    "Patch": 15
   },
   "minimumAgentVersion": "1.83.0",
   "groups": [
@@ -49,6 +49,15 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.SymbolsFolder"
+    },
+    {
+      "name": "SkipIndexing",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.SkipIndexing",
+      "defaultValue": "false",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.SkipIndexing",
+      "groupName": "advanced"
     },
     {
       "name": "TreatNotIndexedAsWarning",
@@ -98,6 +107,10 @@
   ],
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
   "execution": {
+    "PowerShell3": {
+      "target": "$(currentDirectory)\\PublishSymbols_PSExe.ps1",
+      "argumentFormat": ""
+    },
     "PowerShell": {
       "target": "$(currentDirectory)\\PublishSymbols.ps1",
       "argumentFormat": "",

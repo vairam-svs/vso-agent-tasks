@@ -12,5 +12,9 @@
   "loc.input.label.arguments": "Arguments",
   "loc.input.help.arguments": "Arguments passed to the PowerShell script.  Either ordinal parameters or named parameters",
   "loc.input.label.workingFolder": "Working folder",
-  "loc.input.help.workingFolder": "Current working directory when script is run.  Defaults to the folder where the script is located."
+  "loc.input.help.workingFolder": "Current working directory when script is run.  Defaults to the folder where the script is located.",
+  "loc.input.label.noProfile": "No profile",
+  "loc.input.help.noProfile": "Controls whether to load profile scripts.",
+  "loc.input.label.failOnStandardError": "Fail on Standard Error",
+  "loc.input.help.failOnStandardError": "Indicates whether to fail the task if any output is written to the error stream of the process. Write-Error propagates to the error stream of the process. Additionally, error stream data from an external command propagates to the error stream of the PowerShell process."
 }

@@ -8,7 +8,7 @@ Register-Mock Write-Warning
 Register-Mock Get-MSBuildLocation { 'Some resolved location' } -- -Version '' -Architecture 'Some architecture'
 
 # Act.
-$actual = Select-MSBuildLocation -Method 'Version' -Location '' -Version 'Some unknown version' -Architecture 'Some architecture'
+$actual = Select-MSBuildLocation -Method 'Version' -Location '' -Version 'Some unknown version' -RequireVersion:$false -Architecture 'Some architecture'
 
 # Assert.
 Assert-WasCalled Write-Warning

@@ -52,9 +52,6 @@ describe('MSBuild Suite', function () {
         it('(Invoke-BuildTools) skips restore if specified', (done) => {
             psm.runPS(path.join(__dirname, 'Invoke-BuildTools.SkipsRestoreIfSpecified.ps1'), done);
         })
-        it('passes arguments', (done) => {
-            psm.runPS(path.join(__dirname, 'PassesArguments.ps1'), done);
-        })
         it('(Select-MSBuildLocation) defaults method to location if location specified', (done) => {
             psm.runPS(path.join(__dirname, 'Select-MSBuildLocation.DefaultsMethodToLocationIfLocationSpecified.ps1'), done);
         })
@@ -78,6 +75,9 @@ describe('MSBuild Suite', function () {
         })
         it('(Select-MSBuildLocation) throws if version not found', (done) => {
             psm.runPS(path.join(__dirname, 'Select-MSBuildLocation.ThrowsIfVersionNotFound.ps1'), done);
+        })
+        it('passes arguments', (done) => {
+            psm.runPS(path.join(__dirname, 'PassesArguments.ps1'), done);
         })
     }
 });

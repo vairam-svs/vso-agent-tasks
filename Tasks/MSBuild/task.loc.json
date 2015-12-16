@@ -15,7 +15,7 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 16
+    "Patch": 17
   },
   "demands": [
     "msbuild"
@@ -64,14 +64,16 @@
       "type": "boolean",
       "label": "ms-resource:loc.input.label.clean",
       "defaultValue": "false",
-      "required": false
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.clean"
     },
     {
       "name": "restoreNugetPackages",
       "type": "boolean",
       "label": "ms-resource:loc.input.label.restoreNugetPackages",
       "defaultValue": "true",
-      "required": false
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.restoreNugetPackages"
     },
     {
       "name": "logProjectEvents",
@@ -110,6 +112,16 @@
       }
     },
     {
+      "name": "requireMSBuildVersion",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.requireMSBuildVersion",
+      "required": false,
+      "groupName": "advanced",
+      "defaultValue": "false",
+      "helpMarkDown": "ms-resource:loc.input.help.requireMSBuildVersion",
+      "visibleRule": "msbuildLocationMethod = version"
+    },
+    {
       "name": "msbuildArchitecture",
       "type": "pickList",
       "label": "ms-resource:loc.input.label.msbuildArchitecture",
@@ -136,6 +148,10 @@
   ],
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
   "execution": {
+    "PowerShell3": {
+      "target": "$(currentDirectory)\\MSBuild_PSExe.ps1",
+      "argumentFormat": ""
+    },
     "PowerShell": {
       "target": "$(currentDirectory)\\MSBuild.ps1",
       "argumentFormat": "",

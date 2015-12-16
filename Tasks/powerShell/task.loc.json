@@ -16,7 +16,7 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 5
+    "Patch": 6
   },
   "demands": [
     "DotNetFramework"
@@ -52,6 +52,24 @@
       "defaultValue": "",
       "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.workingFolder",
+      "groupName": "advanced"
+    },
+    {
+      "name": "noProfile",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.noProfile",
+      "defaultValue": "true",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.noProfile",
+      "groupName": "advanced"
+    },
+    {
+      "name": "failOnStandardError",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.failOnStandardError",
+      "defaultValue": "true",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.failOnStandardError",
       "groupName": "advanced"
     }
   ],
